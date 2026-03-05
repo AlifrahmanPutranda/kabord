@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(curl:*)",
+      "mcp__zread__read_file",
+      "Bash(npm:*)"
+    ]
+  }
+}
