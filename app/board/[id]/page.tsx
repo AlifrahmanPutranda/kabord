@@ -3,7 +3,7 @@ import { getCurrentUser } from '@/lib/session';
 import { getBoardById, getBoardMembers, isBoardMember, isBoardOwner } from '@/lib/boards';
 import { getBoardCategories, getBoardRequesters } from '@/lib/board-settings';
 import { getTasksByBoard } from '@/lib/tasks';
-import BoardClient from '../BoardClient';
+import BoardClient from './BoardClient';
 
 export const dynamic = 'force-dynamic';
 
