@@ -27,8 +27,9 @@ export default function Header({ user, board, isOwner, onLogout }: Props) {
             <span className="header-subtitle">IT Task Kanban Board</span>
           )}
         </h1>
+      </div>
 
-        <div className="header-right">
+      <div className="header-right">
         <div className="user-info">
           <div className="user-avatar">{user.username.charAt(0).toUpperCase()}</div>
           <div className="user-details">
