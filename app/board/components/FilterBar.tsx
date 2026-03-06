@@ -12,6 +12,9 @@ interface Props {
   filterAssignee: string;
   onAssigneeChange: (assignee: string) => void;
   onNewTask: () => void;
+  categories?: string[];
+  requesters?: string[];
+  assignees?: string[];
 }
 
 export default function FilterBar({
@@ -26,6 +29,9 @@ export default function FilterBar({
   filterAssignee,
   onAssigneeChange,
   onNewTask,
+  categories = [],
+  requesters = [],
+  assignees = [],
 }: Props) {
   return (
     <div className="filter-bar">
@@ -60,15 +66,9 @@ export default function FilterBar({
           onChange={(e) => onCategoryChange(e.target.value)}
         >
           <option value="all">All Categories</option>
-          <option value="System">System</option>
-          <option value="Infrastructure">Infrastructure</option>
-          <option value="HR">HR</option>
-          <option value="Access">Access</option>
-          <option value="Finance">Finance</option>
-          <option value="Marketing">Marketing</option>
-          <option value="CRM">CRM</option>
-          <option value="Estate">Estate</option>
-          <option value="Other">Other</option>
+          {categories.map((cat) => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
         </select>
 
         <select
@@ -77,15 +77,9 @@ export default function FilterBar({
           onChange={(e) => onRequesterChange(e.target.value)}
         >
           <option value="all">All Requesters</option>
-          <option value="Pak Fiki">Pak Fiki</option>
-          <option value="Pak Vic">Pak Vic</option>
-          <option value="Pak Victor">Pak Victor</option>
-          <option value="HR">HR</option>
-          <option value="Finance">Finance</option>
-          <option value="Marketing">Marketing</option>
-          <option value="CRM Team">CRM Team</option>
-          <option value="Estate">Estate</option>
-          <option value="Other">Other</option>
+          {requesters.map((req) => (
+            <option key={req} value={req}>{req}</option>
+          ))}
         </select>
 
         <select
@@ -94,12 +88,9 @@ export default function FilterBar({
           onChange={(e) => onAssigneeChange(e.target.value)}
         >
           <option value="all">All Assignees</option>
-          <option value="Pak Fiki">Pak Fiki</option>
-          <option value="IT Team">IT Team</option>
-          <option value="Dev Team">Dev Team</option>
-          <option value="Ryan">Ryan</option>
-          <option value="HR & IT">HR & IT</option>
-          <option value="Pak Victor">Pak Victor</option>
+          {assignees.map((assignee) => (
+            <option key={assignee} value={assignee}>{assignee}</option>
+          ))}
         </select>
       </div>
 
