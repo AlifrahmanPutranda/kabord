@@ -30,7 +30,7 @@ export default function LoginPage() {
         return;
       }
 
-      router.push('/board');
+      router.push('/dashboard');
       router.refresh();
     } catch (err) {
       setError('Login failed');

@@ -2,19 +2,27 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Task, Column as ColumnType, Priority, User, Activity } from './types';
-import Header from './components/Header';
-import StatsBar from './components/StatsBar';
-import FilterBar from './components/FilterBar';
-import ColumnComponent from './components/ColumnComponent';
-import TaskDetailModal from './components/TaskDetailModal';
-import TaskEditModal from './components/TaskEditModal';
-import TaskCreateModal from './components/TaskCreateModal';
-import Toast from './components/Toast';
-import { DragDropContextType, DropResult } from './utils/dragDrop';
+import { Task, Column as ColumnType, Priority, User, Activity } from '../types';
+import Header from '../components/Header';
+import StatsBar from '../components/StatsBar';
+import FilterBar from '../components/FilterBar';
+import ColumnComponent from '../components/ColumnComponent';
+import TaskDetailModal from '../components/TaskDetailModal';
+import TaskEditModal from '../components/TaskEditModal';
+import TaskCreateModal from '../components/TaskCreateModal';
+import Toast from '../components/Toast';
+import { DragDropContextType, DropResult } from '../utils/dragDrop';
+
+interface Board {
+  id: string;
+  name: string;
+  description: string;
+  ownerId: number;
+}
 
 interface Props {
   user: User;
+  board: Board;
   initialTasks: Task[];
   columns: ColumnType[];
   priorities: Priority[];
@@ -22,9 +30,21 @@ interface Props {
   categories: string[];
   requesters: string[];
   assignees: string[];
+  isOwner: boolean;
 }
 
-export default function BoardClient({ user, initialTasks, columns, priorities, statuses, categories, requesters, assignees }: Props) {
+export default function BoardClient({
+  user,
+  board,
+  initialTasks,
+  columns,
+  priorities,
+  statuses,
+  categories,
+  requesters,
+  assignees,
+  isOwner
+}: Props) {
   const router = useRouter();
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [isLoading, setIsLoading] = useState(false);
@@ -66,7 +86,7 @@ export default function BoardClient({ user, initialTasks, columns, priorities, s
   const refreshTasks = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/tasks');
+      const res = await fetch(`/api/boards/${board.id}/tasks`);
       const data = await res.json();
       if (data.tasks) {
         setTasks(data.tasks);
@@ -113,7 +133,7 @@ export default function BoardClient({ user, initialTasks, columns, priorities, s
       // Rollback on error
       setTasks(prevTasks => prevTasks.map(task => {
         if (task.id === taskId) {
-          return { ...task, status: sourceColumnId };
+        return { ...task, status: sourceColumnId };
         }
         return task;
       }));
@@ -136,7 +156,7 @@ export default function BoardClient({ user, initialTasks, columns, priorities, s
   const handleTaskDeleted = async (taskId: string) => {
     setTasks(prev => prev.filter(task => task.id !== taskId));
     setSelectedTask(null);
-    addToast('Task archived', 'success');
+    addToast('Task deleted', 'success');
   };
 
   // Keyboard shortcuts
@@ -174,7 +194,12 @@ export default function BoardClient({ user, initialTasks, columns, priorities, s
 
   return (
     <div className="board-container">
-      <Header user={user} onLogout={handleLogout} />
+      <Header
+        user={user}
+        board={board}
+        isOwner={isOwner}
+        onLogout={handleLogout}
+      />
       <StatsBar tasks={filteredTasks} />
       <FilterBar
         searchQuery={searchQuery}
@@ -188,6 +213,9 @@ export default function BoardClient({ user, initialTasks, columns, priorities, s
         filterAssignee={filterAssignee}
         onAssigneeChange={setFilterAssignee}
         onNewTask={() => setShowCreateModal({ show: true })}
+        categories={categories}
+        requesters={requesters}
+        assignees={assignees}
       />
 
       <div className="board">
@@ -214,6 +242,7 @@ export default function BoardClient({ user, initialTasks, columns, priorities, s
           onClose={() => setSelectedTask(null)}
           onEdit={() => { setEditingTask(selectedTask); setSelectedTask(null); }}
           onDelete={handleTaskDeleted}
+          isOwner={isOwner}
         />
       )}
 
@@ -232,6 +261,7 @@ export default function BoardClient({ user, initialTasks, columns, priorities, s
 
       {showCreateModal.show && (
         <TaskCreateModal
+          boardId={board.id}
           columnId={showCreateModal.columnId || 'todo'}
           priorities={priorities}
           categories={categories}

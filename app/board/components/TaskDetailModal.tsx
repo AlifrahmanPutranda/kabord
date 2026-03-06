@@ -7,9 +7,10 @@ interface Props {
   onClose: () => void;
   onEdit: () => void;
   onDelete: (taskId: string) => void;
+  isOwner?: boolean;
 }
 
-export default function TaskDetailModal({ task, onClose, onEdit, onDelete }: Props) {
+export default function TaskDetailModal({ task, onClose, onEdit, onDelete, isOwner }: Props) {
   const formatDate = (date: string) => {
     if (!date) return '-';
     return new Date(date).toLocaleDateString('id-ID', {
@@ -141,9 +142,11 @@ export default function TaskDetailModal({ task, onClose, onEdit, onDelete }: Pro
         </div>
 
         <div className="modal-footer">
-          <button className="btn btn-danger" onClick={handleDelete}>
-            Archive Task
-          </button>
+          {isOwner && (
+            <button className="btn btn-danger" onClick={handleDelete}>
+              Delete Task
+            </button>
+          )}
           <button className="btn btn-secondary" onClick={onClose}>
             Close
           </button>

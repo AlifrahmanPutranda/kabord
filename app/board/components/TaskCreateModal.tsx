@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Priority } from '../types';
 
 interface Props {
+  boardId: string;
   columnId: string;
   priorities: Priority[];
   categories: string[];
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export default function TaskCreateModal({
+  boardId,
   columnId,
   priorities,
   categories,
@@ -38,7 +40,7 @@ export default function TaskCreateModal({
     setIsSaving(true);
 
     try {
-      const response = await fetch('/api/tasks', {
+      const response = await fetch(`/api/boards/${boardId}/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

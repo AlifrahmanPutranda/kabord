@@ -2,6 +2,7 @@ import { getDb } from './db';
 
 export interface Task {
   id: string;
+  boardId: string;
   title: string;
   description: string;
   priority: string;
@@ -30,6 +31,38 @@ export async function getAllTasks(): Promise<Task[]> {
 
   const tasks: Task[] = tasksResult.map(row => ({
     ...row,
+    boardId: row.boardId || 'default-board',
+    archived: row.archived === 1,
+    activity: []
+  }));
+
+  // Add activities
+  activityResult.forEach((actRow: any) => {
+    const taskId = actRow.taskId as string;
+    const task = tasks.find(t => t.id === taskId);
+    if (task) {
+      task.activity.push({
+        time: actRow.time as string,
+        text: actRow.text as string
+      });
+    }
+  });
+
+  return tasks;
+}
+
+// Get tasks by board ID
+export function getTasksByBoard(boardId: string): Task[] {
+  const db = getDb();
+
+  const tasksResult = db.prepare('SELECT * FROM tasks WHERE boardId = ? AND archived = 0').all(boardId) as any[];
+  const activityResult = db.prepare('SELECT * FROM activity WHERE boardId = ? ORDER BY id DESC').all(boardId) as any[];
+
+  if (tasksResult.length === 0) return [];
+
+  const tasks: Task[] = tasksResult.map(row => ({
+    ...row,
+    boardId: row.boardId || boardId,
     archived: row.archived === 1,
     activity: []
   }));
@@ -59,6 +92,23 @@ export async function getTaskById(id: string): Promise<Task | null> {
   const activityResult = db.prepare('SELECT time, text FROM activity WHERE taskId = ? ORDER BY id DESC').all(id) as any[];
   task.activity = activityResult.map(a => ({ time: a.time, text: a.text }));
   task.archived = task.archived === 1;
+  task.boardId = task.boardId || 'default-board';
+
+  return task;
+}
+
+// Get task by ID with board check
+export function getTaskByIdAndBoard(taskId: string, boardId: string): Task | null {
+  const db = getDb();
+  const task = db.prepare('SELECT * FROM tasks WHERE id = ? AND boardId = ?').get(taskId, boardId) as any;
+
+  if (!task) return null;
+
+  // Get activities
+  const activityResult = db.prepare('SELECT time, text FROM activity WHERE taskId = ? ORDER BY id DESC').all(taskId) as any[];
+  task.activity = activityResult.map(a => ({ time: a.time, text: a.text }));
+  task.archived = task.archived === 1;
+  task.boardId = task.boardId || boardId;
 
   return task;
 }
@@ -67,19 +117,81 @@ export async function createTask(task: Omit<Task, 'createdAt' | 'archived' | 'ac
   const db = getDb();
   const now = new Date().toISOString().slice(0, 10);
   const activityTime = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  const boardId = task.boardId || 'default-board';
 
   db.prepare(`
-    INSERT INTO tasks (id, title, description, priority, status, requestedBy, assignee, dueDate, category, createdAt, archived)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+    INSERT INTO tasks (id, boardId, title, description, priority, status, requestedBy, assignee, dueDate, category, createdAt, archived)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
   `).run(
-    task.id, task.title, task.description || '', task.priority, task.status,
+    task.id, boardId, task.title, task.description || '', task.priority, task.status,
     task.requestedBy || '', task.assignee || '', task.dueDate || '', task.category, now
   );
 
-  db.prepare('INSERT INTO activity (taskId, time, text) VALUES (?, ?, ?)').run(task.id, activityTime, 'Task created');
+  db.prepare('INSERT INTO activity (taskId, boardId, time, text) VALUES (?, ?, ?, ?)').run(task.id, boardId, activityTime, 'Task created');
 
   return {
     ...task,
+    boardId,
+    createdAt: now,
+    archived: false,
+    activity: [{ time: activityTime, text: 'Task created' }]
+  };
+}
+
+// Create task with explicit board ID (for board-scoped API)
+export function createTaskInBoard(
+  boardId: string,
+  taskData: {
+    id: string;
+    title: string;
+    description?: string;
+    priority?: string;
+    status?: string;
+    requestedBy?: string;
+    assignee?: string;
+    dueDate?: string;
+    category?: string;
+  }
+): Task {
+  const db = getDb();
+  const now = new Date().toISOString().slice(0, 10);
+  const activityTime = new Date().toISOString().slice(0, 16).replace('T', ' ');
+
+  db.prepare(`
+    INSERT INTO tasks (id, boardId, title, description, priority, status, requestedBy, assignee, dueDate, category, createdAt, archived)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+  `).run(
+    taskData.id,
+    boardId,
+    taskData.title,
+    taskData.description || '',
+    taskData.priority || 'medium',
+    taskData.status || 'todo',
+    taskData.requestedBy || '',
+    taskData.assignee || '',
+    taskData.dueDate || '',
+    taskData.category || '',
+    now
+  );
+
+  db.prepare('INSERT INTO activity (taskId, boardId, time, text) VALUES (?, ?, ?, ?)').run(
+    taskData.id,
+    boardId,
+    activityTime,
+    'Task created'
+  );
+
+  return {
+    id: taskData.id,
+    boardId,
+    title: taskData.title,
+    description: taskData.description || '',
+    priority: taskData.priority || 'medium',
+    status: taskData.status || 'todo',
+    requestedBy: taskData.requestedBy || '',
+    assignee: taskData.assignee || '',
+    dueDate: taskData.dueDate || '',
+    category: taskData.category || '',
     createdAt: now,
     archived: false,
     activity: [{ time: activityTime, text: 'Task created' }]

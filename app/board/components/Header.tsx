@@ -4,20 +4,31 @@ import { User } from '../types';
 
 interface Props {
   user: User;
+  board?: {
+    id: string;
+    name: string;
+  };
+  isOwner?: boolean;
   onLogout: () => void;
 }
 
-export default function Header({ user, onLogout }: Props) {
+export default function Header({ user, board, isOwner, onLogout }: Props) {
   return (
     <header className="header">
       <div className="header-left">
+        <a href="/dashboard" className="header-back">
+          ← Dashboard
+        </a>
         <h1 className="header-title">
           <span className="logo">📋</span>
-          Kabord
+          {board ? (
+            <span className="header-subtitle">{board.name}</span>
+          ) : (
+            <span className="header-subtitle">IT Task Kanban Board</span>
+          )}
         </h1>
-        <span className="header-subtitle">IT Task Kanban Board</span>
-      </div>
-      <div className="header-right">
+
+        <div className="header-right">
         <div className="user-info">
           <div className="user-avatar">{user.username.charAt(0).toUpperCase()}</div>
           <div className="user-details">
@@ -25,10 +36,18 @@ export default function Header({ user, onLogout }: Props) {
             <span className="user-role">{user.role}</span>
           </div>
         </div>
-        <button onClick={onLogout} className="btn btn-logout" title="Logout">
-          <span>🚪</span>
-          <span className="btn-text">Logout</span>
-        </button>
+
+        <div className="header-actions">
+          {board && (
+            <a href={`/board/${board.id}/settings`} className="btn btn-settings" title="Settings">
+              ⚙️
+            </a>
+          )}
+          <button onClick={onLogout} className="btn btn-logout" title="Logout">
+            <span>🚪</span>
+            <span className="btn-text">Logout</span>
+          </button>
+        </div>
       </div>
     </header>
   );
