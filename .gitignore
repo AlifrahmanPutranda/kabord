@@ -1,5 +1,10 @@
 node_modules/
 .next/
 *.db
+*.db-wal
+*.db-shm
+*.db.bak
 .env
 .env.local
+.kabord.key
+.claude/settings.local.json

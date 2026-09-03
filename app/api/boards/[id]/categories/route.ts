@@ -1,66 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/session';
-import { isBoardMember } from '@/lib/boards';
+import { withApi, ApiError, requireUser, requireBoardMember, type RouteCtx } from '@/lib/api-auth';
 import { getBoardCategories, createCategory } from '@/lib/board-settings';
 
-// GET /api/boards/[id]/categories - Get board categories
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const GET = withApi(async (_req: NextRequest, ctx: RouteCtx) => {
+  const { id } = await ctx.params;
+  const user = await requireUser();
+  requireBoardMember(id, user);
+  return NextResponse.json({ categories: getBoardCategories(id) });
+});
+
+export const POST = withApi(async (req: NextRequest, ctx: RouteCtx) => {
+  const { id } = await ctx.params;
+  const user = await requireUser();
+  requireBoardMember(id, user);
+
+  const body = await req.json();
+  const name = String(body?.name || '').trim();
+  if (!name) throw new ApiError(400, 'Label name is required');
+
   try {
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { id } = await params;
-
-    if (!isBoardMember(id, user.id)) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-    }
-
-    const categories = getBoardCategories(id);
-    return NextResponse.json({ categories });
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-    return NextResponse.json({ error: 'Failed to fetch categories' }, { status: 500 });
-  }
-}
-
-// POST /api/boards/[id]/categories - Create category
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { id } = await params;
-
-    if (!isBoardMember(id, user.id)) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-    }
-
-    const body = await request.json();
-    const { name, color } = body;
-
-    if (!name || !name.trim()) {
-      return NextResponse.json({ error: 'Category name is required' }, { status: 400 });
-    }
-
-    const category = createCategory(id, name.trim(), color);
-
-    if (!category) {
-      return NextResponse.json({ error: 'Failed to create category' }, { status: 500 });
-    }
-
+    const category = createCategory(id, name, String(body?.color || '#64748b'));
     return NextResponse.json({ category }, { status: 201 });
-  } catch (error) {
-    console.error('Error creating category:', error);
-    return NextResponse.json({ error: 'Failed to create category' }, { status: 500 });
+  } catch (e) {
+    throw new ApiError(400, 'Label already exists');
   }
-}
+});

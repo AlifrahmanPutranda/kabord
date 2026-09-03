@@ -1,59 +1,71 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getTaskById, updateTask, deleteTask, archiveTask } from '@/lib/tasks';
-import { getCurrentUser } from '@/lib/session';
+import { getTaskById, updateTask, deleteTask, archiveTask, moveTask } from '@/lib/tasks';
+import { withApi, ApiError, requireUser, requireBoardMember, requireBoardOwner, type RouteCtx } from '@/lib/api-auth';
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { id } = await params;
+// Load a task and verify the caller is a member of its board.
+async function requireTask(id: string) {
+  const user = await requireUser();
   const task = await getTaskById(id);
-  if (!task) {
-    return NextResponse.json({ error: 'Task not found' }, { status: 404 });
-  }
+  if (!task) throw new ApiError(404, 'Task not found');
+  requireBoardMember(task.boardId, user);
+  return { user, task };
+}
+
+export const GET = withApi(async (_request: NextRequest, ctx: RouteCtx) => {
+  const { id } = await ctx.params;
+  const { task } = await requireTask(id);
   return NextResponse.json({ task });
-}
+});
 
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+export const PUT = withApi(async (request: NextRequest, ctx: RouteCtx) => {
+  const { id } = await ctx.params;
+  const { user, task: existing } = await requireTask(id);
 
-  try {
-    const { id } = await params;
-    const data = await request.json();
+  const data = await request.json();
 
-    // Handle archive separately
-    if (data.archived === true && data.status === 'archived') {
-      await archiveTask(id);
-      const task = await getTaskById(id);
-      return NextResponse.json({ task });
-    }
-
-    const task = await updateTask(id, data);
-    if (!task) {
-      return NextResponse.json({ error: 'Task not found' }, { status: 404 });
-    }
+  // Handle archive separately
+  if (data.archived === true && data.status === 'archived') {
+    await archiveTask(id, user.id);
+    const task = await getTaskById(id);
     return NextResponse.json({ task });
-  } catch (error) {
-    console.error('Error updating task:', error);
-    return NextResponse.json({ error: 'Failed to update task' }, { status: 500 });
-  }
-}
-
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { id } = await params;
-  const success = await deleteTask(id);
-  if (!success) {
-    return NextResponse.json({ error: 'Task not found' }, { status: 404 });
+  // id/boardId are never client-writable.
+  delete data.id;
+  delete data.boardId;
+
+  // Column move (drag & drop): columnId + optional target index.
+  const columnId = data.columnId !== undefined ? data.columnId : null;
+  const position = data.position !== undefined ? Number(data.position) : null;
+  delete data.columnId;
+  delete data.position;
+  delete data.status; // status changes only via columnId moves
+
+  let moved = null;
+  if (columnId !== null && (columnId !== existing.status || position !== null)) {
+    const result = await moveTask(id, String(columnId), position ?? 0, user.id);
+    if (result.error) throw new ApiError(400, result.error);
+    if (result.task) moved = result.task;
   }
+
+  const hasOtherUpdates = Object.keys(data).length > 0;
+  if (!hasOtherUpdates) {
+    const task = moved || (await getTaskById(id));
+    return NextResponse.json({ task });
+  }
+
+  const task = await updateTask(id, data, user.id);
+  if (!task) throw new ApiError(404, 'Task not found');
+  return NextResponse.json({ task });
+});
+
+export const DELETE = withApi(async (_request: NextRequest, ctx: RouteCtx) => {
+  const { id } = await ctx.params;
+  const { task, user } = await requireTask(id);
+
+  // Only the board owner can permanently delete tasks.
+  requireBoardOwner(task.boardId, user);
+
+  await deleteTask(id);
   return NextResponse.json({ success: true });
-}
+});

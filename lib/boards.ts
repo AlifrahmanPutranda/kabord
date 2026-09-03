@@ -1,4 +1,5 @@
 import { getDb } from './db';
+import { seedDefaultColumns } from './columns';
 
 export interface Board {
   id: string;
@@ -108,6 +109,9 @@ export function createBoard(data: { name: string; description?: string }, ownerI
     `).run(boardId, name, index);
   });
 
+  // Seed the 4 default kanban columns
+  seedDefaultColumns(boardId);
+
   return getBoardByIdInternal(boardId)!;
 }
 
@@ -156,8 +160,13 @@ export function deleteBoard(boardId: string, userId: number): { success: boolean
     return { success: false, error: 'Board not found or you are not the owner' };
   }
 
-  // Delete board (cascade will handle members, invitations, categories, requesters, tasks)
-  db.prepare('DELETE FROM boards WHERE id = ?').run(boardId);
+  // Manual cascade: activity references tasks without ON DELETE CASCADE,
+  // and tasks.boardId has no cascade either. Everything else cascades via FK.
+  db.transaction(() => {
+    db.prepare('DELETE FROM activity WHERE boardId = ?').run(boardId);
+    db.prepare('DELETE FROM tasks WHERE boardId = ?').run(boardId); // cascades subtasks/comments/task_links
+    db.prepare('DELETE FROM boards WHERE id = ?').run(boardId); // cascades members, columns, categories, requesters, invitations
+  })();
 
   return { success: true };
 }

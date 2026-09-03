@@ -55,14 +55,3 @@ export async function createUser(username: string, password: string): Promise<{ 
   }
 }
 
-export async function getAllUsers(): Promise<User[]> {
-  const db = getDb();
-  const stmt = db.prepare('SELECT id, username, role FROM users');
-  const rows = stmt.all() as any[];
-
-  return rows.map(row => ({
-    id: row.id,
-    username: row.username,
-    role: row.role
-  }));
-}

@@ -1,0 +1,160 @@
+/* Dashboard — board grid, cards, invitations. */
+
+.kb-dash {
+  padding: var(--kb-sp-6);
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--kb-sp-5);
+}
+
+.kb-dash__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--kb-sp-3);
+}
+
+.kb-dash__title {
+  font-size: var(--kb-fs-2xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.kb-dash__sub {
+  color: var(--kb-text-muted);
+  font-size: var(--kb-fs-md);
+  margin-top: 2px;
+}
+
+.kb-dash__section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--kb-sp-2);
+  font-size: var(--kb-fs-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--kb-text-muted);
+}
+
+.kb-boardgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--kb-sp-4);
+}
+
+.kb-boardcard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--kb-sp-3);
+  padding: var(--kb-sp-4);
+  background: var(--kb-bg-raised);
+  border: 1px solid var(--kb-border-base);
+  border-radius: var(--kb-r-lg);
+  transition: border-color var(--kb-t-fast), box-shadow var(--kb-t-fast), transform var(--kb-t-fast);
+}
+
+.kb-boardcard:hover {
+  border-color: var(--kb-border-strong);
+  box-shadow: var(--kb-shadow-md);
+  transform: translateY(-1px);
+}
+
+.kb-boardcard__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--kb-sp-2);
+}
+
+.kb-boardcard__name {
+  font-size: var(--kb-fs-lg);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kb-boardcard__desc {
+  font-size: var(--kb-fs-md);
+  color: var(--kb-text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 20px;
+}
+
+.kb-boardcard__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--kb-sp-3);
+  font-size: var(--kb-fs-sm);
+  color: var(--kb-text-muted);
+}
+
+.kb-boardcard__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.kb-boardcard__menu {
+  position: absolute;
+  top: var(--kb-sp-2);
+  right: var(--kb-sp-2);
+}
+
+/* Invitations */
+
+.kb-invitations {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kb-sp-2);
+}
+
+.kb-invitation {
+  display: flex;
+  align-items: center;
+  gap: var(--kb-sp-3);
+  padding: var(--kb-sp-3) var(--kb-sp-4);
+  background: var(--kb-bg-raised);
+  border: 1px solid var(--kb-border-base);
+  border-radius: var(--kb-r-lg);
+}
+
+.kb-invitation__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.kb-invitation__board {
+  font-weight: 550;
+}
+
+.kb-invitation__meta {
+  font-size: var(--kb-fs-sm);
+  color: var(--kb-text-muted);
+}
+
+.kb-invitation__actions {
+  display: flex;
+  gap: var(--kb-sp-2);
+  flex-shrink: 0;
+}
+
+/* Dashboard skeletons */
+.kb-dash-skel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--kb-sp-4);
+}
+
+.kb-dash-skel {
+  height: 132px;
+  border-radius: var(--kb-r-lg);
+}

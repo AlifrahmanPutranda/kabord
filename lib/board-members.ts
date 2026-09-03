@@ -11,35 +11,7 @@ export interface BoardMember {
 }
 
 // Get all members of a board
-export function getBoardMembers(boardId: string): BoardMember[] {
-  const db = getDb();
-
-  const members = db.prepare(`
-    SELECT bm.*, u.username
-    FROM board_members bm
-    INNER JOIN users u ON bm.userId = u.id
-    WHERE bm.boardId = ?
-    ORDER BY bm.role DESC, bm.joinedAt ASC
-  `).all(boardId) as BoardMember[];
-
-  return members;
-}
-
 // Get members for assignee dropdown (returns usernames)
-export function getBoardMembersForAssignee(boardId: string): { username: string; userId: number }[] {
-  const db = getDb();
-
-  const members = db.prepare(`
-    SELECT u.username, u.id as userId
-    FROM board_members bm
-    INNER JOIN users u ON bm.userId = u.id
-    WHERE bm.boardId = ?
-    ORDER BY u.username ASC
-  `).all(boardId) as { username: string; userId: number }[];
-
-  return members;
-}
-
 // Invite a user to a board by username
 export function inviteMember(
   boardId: string,
@@ -135,29 +107,6 @@ export function removeMember(
 }
 
 // Leave a board (for members, not owners)
-export function leaveBoard(
-  boardId: string,
-  userId: number
-): { success: boolean; error?: string } {
-  const db = getDb();
-
-  // Check if user is the owner
-  if (isBoardOwner(boardId, userId)) {
-    return { success: false, error: 'Board owner cannot leave the board. Transfer ownership or delete the board instead.' };
-  }
-
-  // Remove the user from board members
-  const result = db.prepare(`
-    DELETE FROM board_members WHERE boardId = ? AND userId = ?
-  `).run(boardId, userId);
-
-  if (result.changes === 0) {
-    return { success: false, error: 'You are not a member of this board' };
-  }
-
-  return { success: true };
-}
-
 // Add user as member directly (used when accepting invitation)
 export function addBoardMember(
   boardId: string,

@@ -34,29 +34,6 @@ export function getUserInvitations(userId: number): Invitation[] {
   return invitations;
 }
 
-// Get invitation by ID
-export function getInvitationById(invitationId: number): (Invitation & { invitedUserId: number }) | null {
-  const db = getDb();
-
-  const invitation = db.prepare(`
-    SELECT
-      bi.id,
-      bi.boardId,
-      bi.invitedUserId,
-      b.name as boardName,
-      u.username as invitedBy,
-      bi.status,
-      bi.createdAt,
-      bi.respondedAt
-    FROM board_invitations bi
-    INNER JOIN boards b ON bi.boardId = b.id
-    INNER JOIN users u ON bi.invitedByUserId = u.id
-    WHERE bi.id = ?
-  `).get(invitationId) as (Invitation & { invitedUserId: number }) | undefined;
-
-  return invitation || null;
-}
-
 // Accept an invitation
 export function acceptInvitation(
   invitationId: number,
@@ -117,14 +94,3 @@ export function rejectInvitation(
 }
 
 // Get pending invitation count for a user
-export function getPendingInvitationCount(userId: number): number {
-  const db = getDb();
-
-  const result = db.prepare(`
-    SELECT COUNT(*) as count
-    FROM board_invitations
-    WHERE invitedUserId = ? AND status = 'pending'
-  `).get(userId) as { count: number };
-
-  return result.count;
-}

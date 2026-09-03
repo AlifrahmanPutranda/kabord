@@ -1,0 +1,97 @@
+/* Reset + document-level styles for the kb-* design system. */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  font-family: var(--kb-font-sans);
+  font-size: var(--kb-fs-md);
+  line-height: var(--kb-lh-normal);
+  color: var(--kb-text-primary);
+  background: var(--kb-bg-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* Focus visibility — one consistent ring across both themes. */
+:focus-visible {
+  outline: 2px solid var(--kb-focus-ring);
+  outline-offset: 1px;
+  border-radius: var(--kb-r-xs);
+}
+
+::selection {
+  background: var(--kb-bg-accent-subtle);
+  color: var(--kb-text-primary);
+}
+
+/* Slim scrollbars that match the theme. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--kb-border-strong) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--kb-border-strong);
+  border-radius: var(--kb-r-full);
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

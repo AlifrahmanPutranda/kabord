@@ -1,40 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/session';
-import { isBoardMember, isBoardOwner } from '@/lib/boards';
+import { withApi, ApiError, requireUser, requireBoardOwner, type RouteCtx } from '@/lib/api-auth';
 import { removeMember } from '@/lib/board-members';
+import { getDb } from '@/lib/db';
 
-// DELETE /api/boards/[id]/members/[userId] - Remove a member from board
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string; userId: string }> }
-) {
-  try {
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+// DELETE /api/boards/[id]/members/[userId] — owner removes a member.
+export const DELETE = withApi(async (_req: NextRequest, ctx: RouteCtx) => {
+  const { id, userId } = await ctx.params;
+  const user = await requireUser();
+  requireBoardOwner(id, user);
 
-    const { id, userId: memberUserId } = await params;
-    const memberId = parseInt(memberUserId, 10);
+  // resolve the board_members row for this user on this board
+  const db = getDb();
+  const member = db
+    .prepare('SELECT id FROM board_members WHERE boardId = ? AND userId = ?')
+    .get(id, Number(userId)) as { id: number } | undefined;
+  if (!member) throw new ApiError(404, 'Member not found');
 
-    if (isNaN(memberId)) {
-      return NextResponse.json({ error: 'Invalid user ID' }, { status: 400 });
-    }
-
-    // Check if requester is a member of the board
-    if (!isBoardMember(id, user.id)) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-    }
-
-    const result = removeMember(id, memberId, user.id);
-
-    if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 400 });
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error removing member:', error);
-    return NextResponse.json({ error: 'Failed to remove member' }, { status: 500 });
-  }
-}
+  const result = removeMember(id, member.id, user.id);
+  if (!result.success) throw new ApiError(400, result.error || 'Failed to remove member');
+  return NextResponse.json({ success: true });
+});

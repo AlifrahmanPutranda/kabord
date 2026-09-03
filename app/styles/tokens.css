@@ -1,0 +1,132 @@
+/* ============================================================
+   Kabord design tokens — dark is the default theme.
+   Every color/space/motion decision flows through these; the
+   light theme overrides the same names under [data-theme="light"].
+   ============================================================ */
+
+:root {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --kb-bg-base: #0a0a0c;
+  --kb-bg-raised: #121215;
+  --kb-bg-subtle: #1a1a20;
+  --kb-bg-inset: #0e0e11;
+  --kb-bg-accent-subtle: rgba(94, 106, 210, 0.14);
+
+  /* Borders */
+  --kb-border-base: rgba(255, 255, 255, 0.08);
+  --kb-border-strong: rgba(255, 255, 255, 0.16);
+  --kb-border-accent: rgba(94, 106, 210, 0.55);
+
+  /* Text */
+  --kb-text-primary: #ececf1;
+  --kb-text-secondary: #9d9da8;
+  --kb-text-muted: #6a6a74;
+  --kb-text-on-accent: #ffffff;
+
+  /* Accent */
+  --kb-accent: #5e6ad2;
+  --kb-accent-hover: #6f7ade;
+  --kb-accent-active: #4f5abe;
+  --kb-focus-ring: rgba(94, 106, 210, 0.5);
+
+  /* Status */
+  --kb-success: #4cb782;
+  --kb-success-subtle: rgba(76, 183, 130, 0.14);
+  --kb-warning: #f5a623;
+  --kb-warning-subtle: rgba(245, 166, 35, 0.14);
+  --kb-danger: #eb5757;
+  --kb-danger-subtle: rgba(235, 87, 87, 0.13);
+  --kb-info: #57abdd;
+  --kb-info-subtle: rgba(87, 171, 221, 0.13);
+
+  /* Priority aliases */
+  --kb-priority-low: var(--kb-info);
+  --kb-priority-medium: var(--kb-warning);
+  --kb-priority-high: var(--kb-danger);
+
+  /* Radius */
+  --kb-r-xs: 4px;
+  --kb-r-sm: 6px;
+  --kb-r-md: 8px;
+  --kb-r-lg: 12px;
+  --kb-r-full: 999px;
+
+  /* Spacing (4px rhythm) */
+  --kb-sp-1: 4px;
+  --kb-sp-2: 8px;
+  --kb-sp-3: 12px;
+  --kb-sp-4: 16px;
+  --kb-sp-5: 20px;
+  --kb-sp-6: 24px;
+  --kb-sp-7: 32px;
+  --kb-sp-8: 48px;
+
+  /* Shadows */
+  --kb-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --kb-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --kb-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --kb-shadow-overlay: 0 24px 64px rgba(0, 0, 0, 0.55);
+
+  /* Typography */
+  --kb-font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --kb-font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+  --kb-fs-xs: 11px;
+  --kb-fs-sm: 12px;
+  --kb-fs-md: 13px;
+  --kb-fs-lg: 15px;
+  --kb-fs-xl: 18px;
+  --kb-fs-2xl: 24px;
+  --kb-lh-tight: 1.35;
+  --kb-lh-normal: 1.55;
+
+  /* Z-index scale */
+  --kb-z-dropdown: 100;
+  --kb-z-popover: 150;
+  --kb-z-modal: 200;
+  --kb-z-panel: 250;
+  --kb-z-toast: 300;
+
+  /* Motion */
+  --kb-t-fast: 120ms cubic-bezier(0.2, 0, 0, 1);
+  --kb-t-base: 200ms cubic-bezier(0.2, 0, 0, 1);
+
+  /* Layout */
+  --kb-sidebar-w: 232px;
+  --kb-topbar-h: 52px;
+  --kb-panel-w: 480px;
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+
+  --kb-bg-base: #fafafa;
+  --kb-bg-raised: #ffffff;
+  --kb-bg-subtle: #f1f1f3;
+  --kb-bg-inset: #f7f7f8;
+  --kb-bg-accent-subtle: rgba(94, 106, 210, 0.09);
+
+  --kb-border-base: #e5e5ea;
+  --kb-border-strong: #d4d4da;
+  --kb-border-accent: rgba(94, 106, 210, 0.45);
+
+  --kb-text-primary: #17171a;
+  --kb-text-secondary: #63636d;
+  --kb-text-muted: #8e8e98;
+
+  --kb-accent: #5e6ad2;
+  --kb-accent-hover: #4f5ac4;
+  --kb-accent-active: #414ba8;
+  --kb-focus-ring: rgba(94, 106, 210, 0.35);
+
+  --kb-success-subtle: rgba(46, 160, 103, 0.12);
+  --kb-warning-subtle: rgba(210, 140, 20, 0.12);
+  --kb-danger-subtle: rgba(219, 88, 88, 0.1);
+  --kb-info-subtle: rgba(47, 133, 181, 0.11);
+
+  --kb-shadow-sm: 0 1px 2px rgba(23, 23, 26, 0.06);
+  --kb-shadow-md: 0 4px 12px rgba(23, 23, 26, 0.08);
+  --kb-shadow-lg: 0 12px 32px rgba(23, 23, 26, 0.12);
+  --kb-shadow-overlay: 0 24px 64px rgba(23, 23, 26, 0.16);
+}

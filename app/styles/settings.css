@@ -1,0 +1,118 @@
+/* Settings pages — board settings and user settings share this layout. */
+
+.kb-settings {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: var(--kb-sp-6) var(--kb-sp-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--kb-sp-5);
+}
+
+.kb-settings__title {
+  font-size: var(--kb-fs-2xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.kb-settings__sub {
+  color: var(--kb-text-muted);
+  margin-top: 2px;
+}
+
+.kb-settings__section {
+  background: var(--kb-bg-raised);
+  border: 1px solid var(--kb-border-base);
+  border-radius: var(--kb-r-lg);
+  overflow: hidden;
+}
+
+.kb-settings__section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--kb-sp-3);
+  padding: var(--kb-sp-4) var(--kb-sp-5);
+  border-bottom: 1px solid var(--kb-border-base);
+}
+
+.kb-settings__section-title {
+  font-size: var(--kb-fs-lg);
+  font-weight: 600;
+}
+
+.kb-settings__section-desc {
+  font-size: var(--kb-fs-sm);
+  color: var(--kb-text-muted);
+  margin-top: 2px;
+}
+
+.kb-settings__section-body {
+  padding: var(--kb-sp-4) var(--kb-sp-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--kb-sp-3);
+}
+
+.kb-settings__row {
+  display: flex;
+  align-items: center;
+  gap: var(--kb-sp-3);
+  padding: var(--kb-sp-2) 0;
+}
+
+.kb-settings__row-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.kb-settings__row-title {
+  font-size: var(--kb-fs-md);
+  font-weight: 500;
+}
+
+.kb-settings__row-sub {
+  font-size: var(--kb-fs-sm);
+  color: var(--kb-text-muted);
+}
+
+.kb-settings__danger {
+  border-color: var(--kb-danger);
+}
+
+.kb-settings__form-row {
+  display: flex;
+  gap: var(--kb-sp-2);
+  align-items: flex-start;
+}
+
+/* Provider cards (user settings, Phase 4+) */
+.kb-provider {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kb-sp-3);
+  padding: var(--kb-sp-4);
+  border: 1px solid var(--kb-border-base);
+  border-radius: var(--kb-r-md);
+}
+
+.kb-provider__head {
+  display: flex;
+  align-items: center;
+  gap: var(--kb-sp-2);
+}
+
+.kb-provider__name {
+  font-weight: 600;
+}
+
+.kb-provider__status {
+  font-size: var(--kb-fs-xs);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.kb-provider__status--ok { color: var(--kb-success); }
+.kb-provider__status--error { color: var(--kb-danger); }
+.kb-provider__status--untested { color: var(--kb-text-muted); }
