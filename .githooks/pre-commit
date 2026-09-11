@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+# Cegah commit secret (temuan #3). Aktifkan: git config core.hooksPath .githooks
+command -v gitleaks >/dev/null 2>&1 || { echo "[pre-commit] gitleaks tidak terinstall — LEWAT (install: go install github.com/zricethezav/gitleaks/v8@latest)"; exit 0; }
+gitleaks protect --staged --no-banner -v || {
+  echo "[pre-commit] SECRET TERDETEKSI — commit dibatalkan. Jika FP: tambahkan fingerprint ke .gitleaksignore."
+  exit 1
+}
