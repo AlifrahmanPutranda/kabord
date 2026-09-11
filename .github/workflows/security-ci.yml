@@ -1,0 +1,40 @@
+name: Security CI
+
+# Gate keamanan pasca security-scan 2026-09-10 (temuan #3/#4/#10):
+# 1) gitleaks — secret di commit/history
+# 2) npm audit — dependency prod critical/high
+# 3) semgrep — static analysis severity ERROR
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0 # gitleaks perlu history penuh
+
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: npm audit (prod, gate high+)
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: semgrep
+        run: |
+          pipx install semgrep
+          semgrep scan --config p/default --error --quiet \
+            --exclude design --exclude docs --exclude .next .
