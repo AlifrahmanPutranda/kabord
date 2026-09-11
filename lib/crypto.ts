@@ -108,7 +108,8 @@ export function decryptJson<T>(blob: string, aad: string): T {
   const iv = raw.subarray(0, 12);
   const tag = raw.subarray(12, 28);
   const ct = raw.subarray(28);
-  const decipher = crypto.createDecipheriv('aes-256-gcm', tokenKey(), iv);
+  // authTagLength eksplisit: cegah pemalsuan tag pendek (semgrep gcm-no-tag-length)
+  const decipher = crypto.createDecipheriv('aes-256-gcm', tokenKey(), iv, { authTagLength: 16 });
   decipher.setAAD(Buffer.from(aad, 'utf8'));
   decipher.setAuthTag(tag);
   const pt = Buffer.concat([decipher.update(ct), decipher.final()]).toString('utf8');
